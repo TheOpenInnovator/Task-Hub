@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <h1>Stopwatch</h1>
+    <div>
+      <a href="index.html" target="_blank">Home</a>
+      <a href="tasks.html" target="_blank">Tasks</a>
+      <a href="stopwatch.html" target="_blank">Stopwatch</a>
+      <a href="history.html" target="_blank">History</a>
+    </div>
+  </nav>
+
+  <main>
+    <section>
+      <h2>Timer</h2>
+      <div class="clock" id="display">00:00:00.000</div>
+      <button onclick="start()">Start</button>
+      <button onclick="pause()">Pause</button>
+      <button onclick="reset()">Reset</button>
+    </section>
+  </main>
+
+  <script>
+    let milliseconds = 0;
+    let interval = null;
+
+    function update() {
+      const h = String(Math.floor(milliseconds / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((milliseconds % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((milliseconds % 60000) / 1000)).padStart(2, '0');
+      const ms = String(milliseconds % 1000).padStart(3, '0');
+      document.getElementById('display').textContent = `${h}:${m}:${s}.${ms}`;
+    }
+
+    function start() {
+      if (!interval) {
+        interval = setInterval(() => {
+          milliseconds += 10;
+          update();
+        }, 10); // update every 10ms
+      }
+    }
+
+    function pause() {
+      clearInterval(interval);
+      interval = null;
+    }
+
+    function reset() {
+      pause();
+      milliseconds = 0;
+      update();
+    }
+
+    update(); // initial display
+  </script>
+</body>
+</html>

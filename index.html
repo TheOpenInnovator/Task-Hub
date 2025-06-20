@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task Hub</title>
+  <style>
+    /* Base Styles */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000316;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #000000;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+    }
+
+    nav h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #ffffff;
+    }
+
+    nav div a {
+      margin-left: 1rem;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav div a:hover {
+      color: #0000FF;
+    }
+
+    main {
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    .clock {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: 2px;
+      color: #e8f0f4;
+      text-shadow: 0 0 8px #0000FF;
+    }
+
+    #currentDate {
+      font-size: 1.2rem;
+      color: #a9cde3;
+      margin-bottom: 2rem;
+    }
+
+    #countdownSection {
+      margin-top: 3rem;
+    }
+
+    .editable-heading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-style: oblique;
+      margin-bottom: 1.5rem;
+      color: #ffd51c;
+      text-shadow: 0 0 6px #0000FF;
+    }
+
+    .editable-heading span {
+      font-weight: 600;
+    }
+
+    .edit-icon {
+      cursor: pointer;
+      font-size: 1.3rem;
+      color: #7EC8E3;
+      transition: transform 0.2s ease;
+    }
+
+    .edit-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .seconds-bar-container {
+      width: 90%;
+      max-width: 600px;
+      height: 30px;
+      background-color: #000000;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 1rem auto;
+      position: relative;
+      box-shadow: 0 0 20px #cacaca77;
+    }
+
+    .seconds-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(270deg, #000000, #7EC8E3, #000000);
+      background-size: 600% 600%;
+      animation: animatedBar 8s ease infinite;
+      transition: width 1s linear;
+      border-radius: 20px 0 0 20px;
+    }
+
+    @keyframes animatedBar {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .seconds-label {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 8px #000000, 0 0 20px #000000;
+      margin-top: 1.5rem;
+    }
+
+    .hidden-input {
+      display: none;
+      background-color: #000C66;
+      border: 1px solid #7EC8E3;
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Task Hub</h1>
+    <div>
+      <a href="index.html" target="_blank">Home</a>
+      <a href="tasks.html" target="_blank">Tasks</a>
+      <a href="stopwatch.html" target="_blank">Stopwatch</a>
+      <a href="history.html" target="_blank">History</a>
+    </div>
+  </nav>
+
+  <main>
+    <section>
+      <h2 style="color:#7EC8E3;">Current Time</h2>
+      <div class="clock" id="currentTime">00:00:00.000</div>
+      <div id="currentDate"></div>
+
+      <div id="countdownSection">
+        <div class="editable-heading">
+          <span id="headingText">Seconds Left in the Day</span>
+          <span class="edit-icon" onclick="editHeading()">✏️</span>
+        </div>
+        <input type="text" id="editInput" class="hidden-input" onblur="saveHeading()" onkeydown="handleKey(event)" />
+        <div class="seconds-bar-container">
+          <div class="seconds-bar" id="secondsBar"></div>
+        </div>
+        <div class="seconds-label" id="secondsLeftLabel">86400 / 86400</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+      /*document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;*/
+      document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+
+      document.getElementById('currentDate').textContent = now.toDateString();
+
+      const totalSecondsInDay = 86400;
+      const secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const secondsLeft = totalSecondsInDay - secondsPassed;
+
+      /* document.getElementById('secondsLeftLabel').textContent = `${secondsLeft} / ${totalSecondsInDay}`;*/
+      document.getElementById('secondsLeftLabel').textContent = `${secondsLeft} `;
+
+
+      const bar = document.getElementById('secondsBar');
+      const percentageLeft = (secondsLeft / totalSecondsInDay) * 100;
+      bar.style.width = `${percentageLeft}%`;
+    }
+
+    setInterval(updateClock, 100);
+    updateClock();
+
+    function editHeading() {
+      const heading = document.getElementById('headingText');
+      const input = document.getElementById('editInput');
+
+      input.value = heading.textContent;
+      heading.style.display = 'none';
+      input.style.display = 'inline-block';
+      input.focus();
+    }
+
+    function saveHeading() {
+      const heading = document.getElementById('headingText');
+      const input = document.getElementById('editInput');
+
+      if (input.value.trim() !== '') {
+        heading.textContent = input.value;
+      }
+
+      input.style.display = 'none';
+      heading.style.display = 'inline-block';
+    }
+
+    function handleKey(event) {
+      if (event.key === 'Enter') {
+        saveHeading();
+      }
+    }
+  </script>
+</body>
+</html>
