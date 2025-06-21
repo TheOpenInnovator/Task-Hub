@@ -4,45 +4,294 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Task History</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #0f0f1f;
+      --bg-section: #1a1a2e;
+      --primary: #5c7cfa;
+      --accent: #9aedfe;
+      --text: #f1f1f1;
+      --muted: #cccccc;
+      --glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: var(--bg-section);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px #0009;
+    }
+
+    nav h1 {
+      margin: 0;
+      color: var(--accent);
+    }
+
+    nav div a {
+      margin-left: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    nav div a:hover {
+      color: var(--primary);
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    section {
+      background-color: var(--glass);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      color: var(--accent);
+      text-align: center;
+    }
+
+    input[type="date"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background-color: #1f1f2f;
+      color: var(--text);
+      margin-right: 1rem;
+    }
+
+    select, button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      background-color: var(--primary);
+      color: var(--text);
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-right: 0.5rem;
+    }
+
+    button:hover {
+      background-color: var(--accent);
+      color: #111;
+    }
+
+    .task {
+      background-color: var(--bg-section);
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 10px #0004;
+    }
+
+    .task span {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: #777;
+    }
+
+    .task-count {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    #chartContainer {
+      background-color: var(--bg-section);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 2rem;
+      box-shadow: 0 0 10px #0005;
+    }
+
+    #heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 1rem;
+    }
+
+    .heat-box {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #2b2b3d;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    .heat-box[data-level="1"] { background-color: #3b8bff; }
+    .heat-box[data-level="2"] { background-color: #1f6fff; }
+    .heat-box[data-level="3"] { background-color: #0e4fff; }
+    .heat-box[data-level="4"] { background-color: #062ce3; }
+    .heat-box[data-level="5"] { background-color: #0316ba; }
+  </style>
 </head>
 <body>
   <nav>
     <h1>Task History</h1>
     <div>
-      <a href="index.html" target="_blank">Home</a>
-      <a href="tasks.html" target="_blank">Tasks</a>
-      <a href="stopwatch.html" target="_blank">Stopwatch</a>
-      <a href="history.html" target="_blank">History</a>
+      <a href="index.html">Home</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="stopwatch.html">Stopwatch</a>
+      <a href="history.html">History</a>
     </div>
   </nav>
 
   <main>
     <section>
-      <h2>Select Date</h2>
-      <input type="date" id="historyDate" />
-      <button onclick="loadHistory()">Show Tasks</button>
+      <h2>Review Task History</h2>
+      <div style="text-align:center; margin-bottom: 1rem;">
+        <input type="date" id="historyDate" />
+        <select id="filter">
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+        </select>
+        <button onclick="loadHistory()">Show Tasks</button>
+        <button onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div class="task-count" id="taskCount"></div>
       <div id="result"></div>
+      <div id="chartContainer" style="display:none;">
+        <canvas id="taskChart" height="100"></canvas>
+      </div>
+      <h3 style="text-align:center; color: var(--accent); margin-top: 2rem;">Completion Heatmap</h3>
+      <div id="heatmap"></div>
     </section>
   </main>
 
   <script>
     function loadHistory() {
       const date = document.getElementById('historyDate').value;
+      const filter = document.getElementById('filter').value;
       const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
       const list = tasks[date] || [];
       const result = document.getElementById('result');
+      const countDisplay = document.getElementById('taskCount');
+      const chartContainer = document.getElementById('chartContainer');
+
       result.innerHTML = '';
-      if (!list.length) {
-        result.textContent = "No tasks found for this date.";
+      countDisplay.textContent = '';
+      chartContainer.style.display = 'none';
+
+      let filtered = list;
+      if (filter === 'completed') filtered = list.filter(t => t.completed);
+      else if (filter === 'pending') filtered = list.filter(t => !t.completed);
+
+      if (!filtered.length) {
+        result.innerHTML = '<div style="color: #aaa; text-align: center;">No tasks found for this filter.</div>';
         return;
       }
-      list.forEach(t => {
+
+      countDisplay.textContent = `Total: ${filtered.length} | Completed: ${filtered.filter(t => t.completed).length}`;
+
+      const labels = [];
+      const durations = [];
+
+      filtered.forEach(t => {
         const div = document.createElement('div');
         div.className = 'task';
         div.innerHTML = `<span class="${t.completed ? 'completed' : ''}">${t.start} - ${t.end} | ${t.name}</span>`;
         result.appendChild(div);
+
+        const start = new Date(`1970-01-01T${t.start}:00`);
+        const end = new Date(`1970-01-01T${t.end}:00`);
+        const diff = (end - start) / (1000 * 60); // minutes
+        labels.push(t.name);
+        durations.push(diff);
       });
+
+      chartContainer.style.display = 'block';
+
+      const ctx = document.getElementById('taskChart').getContext('2d');
+      if (window.taskChart) window.taskChart.destroy();
+
+      window.taskChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Duration (minutes)',
+            data: durations,
+            backgroundColor: '#9aedfe',
+            borderColor: '#5c7cfa',
+            borderWidth: 1,
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#ffffff' } }
+          },
+          scales: {
+            x: { ticks: { color: '#ffffff' } },
+            y: { ticks: { color: '#ffffff' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function exportCSV() {
+      const date = document.getElementById('historyDate').value;
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+      const list = tasks[date] || [];
+
+      if (!list.length) return alert("No tasks to export.");
+
+      let csv = 'Task Name,Start,End,Completed\n';
+      list.forEach(t => {
+        csv += `${t.name},${t.start},${t.end},${t.completed ? 'Yes' : 'No'}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `TaskHistory-${date}.csv`);
+    }
+
+    // Generate a simple heatmap (past 28 days)
+    const heatmap = document.getElementById('heatmap');
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+    const today = new Date();
+
+    for (let i = 27; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      const list = tasks[key] || [];
+      const completed = list.filter(t => t.completed).length;
+      const level = Math.min(5, Math.floor(completed / 2));
+
+      const box = document.createElement('div');
+      box.className = 'heat-box';
+      box.dataset.level = level;
+      heatmap.appendChild(box);
     }
   </script>
 </body>
