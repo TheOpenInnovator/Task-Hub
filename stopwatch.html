@@ -3,63 +3,258 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stopwatch</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Stopwatch & Timer</title>
+  <style>
+    :root {
+      --bg-main: #0D1B2A;
+      --bg-section: #1B263B;
+      --primary: #415A77;
+      --accent: #E0E1DD;
+      --text: #ffffff;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    nav {
+      background-color: var(--bg-section);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      box-shadow: 0 4px 10px #0006;
+    }
+
+    nav h1 {
+      color: var(--accent);
+      margin: 0;
+    }
+
+    nav div a {
+      margin-left: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    nav div a:hover {
+      color: var(--primary);
+    }
+
+    main {
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .toggle-icons {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .toggle-icons button {
+      background: var(--primary);
+      border: none;
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-icons button.active {
+      background-color: var(--accent);
+      color: var(--bg-main);
+    }
+
+    .clock {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      text-shadow: 0 0 8px var(--primary);
+    }
+
+    .controls button {
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      color: white;
+      transition: transform 0.2s;
+    }
+
+    .controls button:hover {
+      transform: scale(1.05);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .timer-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .timer-inputs input {
+      width: 60px;
+      padding: 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #888;
+      font-size: 1rem;
+      background-color: var(--bg-section);
+      color: var(--text);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <nav>
-    <h1>Stopwatch</h1>
+    <h1>Task Hub - Time Tools</h1>
     <div>
-      <a href="index.html" target="_blank">Home</a>
-      <a href="tasks.html" target="_blank">Tasks</a>
-      <a href="stopwatch.html" target="_blank">Stopwatch</a>
-      <a href="history.html" target="_blank">History</a>
+      <a href="index.html">Home</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="stopwatch.html">Stopwatch</a>
+      <a href="history.html">History</a>
     </div>
   </nav>
 
   <main>
-    <section>
-      <h2>Timer</h2>
-      <div class="clock" id="display">00:00:00.000</div>
-      <button onclick="start()">Start</button>
-      <button onclick="pause()">Pause</button>
-      <button onclick="reset()">Reset</button>
+    <div class="toggle-icons">
+      <button id="stopwatchBtn" onclick="switchMode('stopwatch')">Stopwatch</button>
+      <button id="timerBtn" onclick="switchMode('timer')">Timer</button>
+    </div>
+
+    <section id="stopwatchSection">
+      <div class="clock" id="stopwatchDisplay">00:00:00.000</div>
+      <div class="controls">
+        <button onclick="startStopwatch()">Start</button>
+        <button onclick="pauseStopwatch()">Pause</button>
+        <button onclick="resetStopwatch()">Reset</button>
+      </div>
+    </section>
+
+    <section id="timerSection" class="hidden">
+      <div class="timer-inputs">
+        <input type="number" id="inputHours" placeholder="HH" min="0" max="23">
+        <input type="number" id="inputMinutes" placeholder="MM" min="0" max="59">
+        <input type="number" id="inputSeconds" placeholder="SS" min="0" max="59">
+      </div>
+      <div class="clock" id="timerDisplay">00:00:00.000</div>
+      <div class="controls">
+        <button onclick="setTimer()">Set</button>
+        <button onclick="startTimer()">Start</button>
+        <button onclick="pauseTimer()">Pause</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
     </section>
   </main>
 
   <script>
-    let milliseconds = 0;
-    let interval = null;
-
-    function update() {
-      const h = String(Math.floor(milliseconds / 3600000)).padStart(2, '0');
-      const m = String(Math.floor((milliseconds % 3600000) / 60000)).padStart(2, '0');
-      const s = String(Math.floor((milliseconds % 60000) / 1000)).padStart(2, '0');
-      const ms = String(milliseconds % 1000).padStart(3, '0');
-      document.getElementById('display').textContent = `${h}:${m}:${s}.${ms}`;
+    // Stopwatch
+    let stopwatchMs = 0, stopwatchInterval;
+    function updateStopwatch() {
+      const h = String(Math.floor(stopwatchMs / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((stopwatchMs % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((stopwatchMs % 60000) / 1000)).padStart(2, '0');
+      const ms = String(stopwatchMs % 1000).padStart(3, '0');
+      document.getElementById('stopwatchDisplay').textContent = `${h}:${m}:${s}.${ms}`;
+    }
+    function startStopwatch() {
+      if (!stopwatchInterval) {
+        stopwatchInterval = setInterval(() => {
+          stopwatchMs += 10;
+          updateStopwatch();
+        }, 10);
+      }
+    }
+    function pauseStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+    }
+    function resetStopwatch() {
+      pauseStopwatch();
+      stopwatchMs = 0;
+      updateStopwatch();
     }
 
-    function start() {
-      if (!interval) {
-        interval = setInterval(() => {
-          milliseconds += 10;
-          update();
-        }, 10); // update every 10ms
+    // Timer
+    let timerMs = 0, timerInterval;
+    function updateTimer() {
+      const h = String(Math.floor(timerMs / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((timerMs % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((timerMs % 60000) / 1000)).padStart(2, '0');
+      const ms = String(timerMs % 1000).padStart(3, '0');
+      document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}.${ms}`;
+    }
+    function setTimer() {
+      const hrs = parseInt(document.getElementById('inputHours').value) || 0;
+      const mins = parseInt(document.getElementById('inputMinutes').value) || 0;
+      const secs = parseInt(document.getElementById('inputSeconds').value) || 0;
+      timerMs = ((hrs * 3600) + (mins * 60) + secs) * 1000;
+      updateTimer();
+    }
+    function startTimer() {
+      if (!timerInterval && timerMs > 0) {
+        timerInterval = setInterval(() => {
+          timerMs -= 10;
+          if (timerMs <= 0) {
+            timerMs = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+          updateTimer();
+        }, 10);
+      }
+    }
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    function resetTimer() {
+      pauseTimer();
+      timerMs = 0;
+      updateTimer();
+    }
+
+    function switchMode(mode) {
+      const swBtn = document.getElementById('stopwatchBtn');
+      const tBtn = document.getElementById('timerBtn');
+      const swSec = document.getElementById('stopwatchSection');
+      const tSec = document.getElementById('timerSection');
+      if (mode === 'stopwatch') {
+        swSec.classList.remove('hidden');
+        tSec.classList.add('hidden');
+        swBtn.classList.add('active');
+        tBtn.classList.remove('active');
+      } else {
+        tSec.classList.remove('hidden');
+        swSec.classList.add('hidden');
+        tBtn.classList.add('active');
+        swBtn.classList.remove('active');
       }
     }
 
-    function pause() {
-      clearInterval(interval);
-      interval = null;
-    }
-
-    function reset() {
-      pause();
-      milliseconds = 0;
-      update();
-    }
-
-    update(); // initial display
+    // Init
+    updateStopwatch();
+    updateTimer();
   </script>
 </body>
 </html>
