@@ -31,7 +31,7 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      box-shadow: 0 4px 10px #0006;
+      box-shadow: 0 4px 10px #0009;
     }
 
     nav h1 {
@@ -52,7 +52,7 @@
     main {
       padding: 2rem;
       width: 100%;
-      max-width: 600px;
+      max-width: 700px;
       text-align: center;
     }
 
@@ -83,7 +83,7 @@
       font-size: 3rem;
       margin-bottom: 1rem;
       color: var(--accent);
-      text-shadow: 0 0 8px var(--primary);
+      text-shadow: 0 0 12px var(--primary);
     }
 
     .controls button {
@@ -106,15 +106,16 @@
       display: none;
     }
 
-    .timer-inputs {
+    .timer-inputs, .task-name-input {
       display: flex;
       justify-content: center;
       gap: 0.5rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
-    .timer-inputs input {
-      width: 60px;
+    .timer-inputs input, .task-name-input input {
+      width: 80px;
       padding: 0.4rem;
       border-radius: 6px;
       border: 1px solid #888;
@@ -122,6 +123,33 @@
       background-color: var(--bg-section);
       color: var(--text);
       text-align: center;
+    }
+
+    .task-name-input input {
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+    }
+
+    .task-display {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    .laps {
+      margin-top: 1rem;
+      text-align: left;
+      color: var(--accent);
+    }
+
+    .laps ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .laps li {
+      margin: 4px 0;
     }
   </style>
 </head>
@@ -148,15 +176,23 @@
         <button onclick="startStopwatch()">Start</button>
         <button onclick="pauseStopwatch()">Pause</button>
         <button onclick="resetStopwatch()">Reset</button>
+        <button onclick="recordLap()">Lap</button>
+      </div>
+      <div class="laps">
+        <ul id="lapList"></ul>
       </div>
     </section>
 
     <section id="timerSection" class="hidden">
+      <div class="task-name-input">
+        <input type="text" id="timerTaskName" placeholder="Optional Task Name (for this timer)" />
+      </div>
       <div class="timer-inputs">
         <input type="number" id="inputHours" placeholder="HH" min="0" max="23">
         <input type="number" id="inputMinutes" placeholder="MM" min="0" max="59">
         <input type="number" id="inputSeconds" placeholder="SS" min="0" max="59">
       </div>
+      <div class="task-display" id="displayTaskName"></div>
       <div class="clock" id="timerDisplay">00:00:00.000</div>
       <div class="controls">
         <button onclick="setTimer()">Set</button>
@@ -167,9 +203,12 @@
     </section>
   </main>
 
+  <audio id="timerSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+
   <script>
-    // Stopwatch
     let stopwatchMs = 0, stopwatchInterval;
+    const lapList = [];
+
     function updateStopwatch() {
       const h = String(Math.floor(stopwatchMs / 3600000)).padStart(2, '0');
       const m = String(Math.floor((stopwatchMs % 3600000) / 60000)).padStart(2, '0');
@@ -192,10 +231,21 @@
     function resetStopwatch() {
       pauseStopwatch();
       stopwatchMs = 0;
+      lapList.length = 0;
+      document.getElementById('lapList').innerHTML = '';
       updateStopwatch();
     }
+    function recordLap() {
+      lapList.push(stopwatchMs);
+      const li = document.createElement('li');
+      const h = String(Math.floor(stopwatchMs / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((stopwatchMs % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((stopwatchMs % 60000) / 1000)).padStart(2, '0');
+      const ms = String(stopwatchMs % 1000).padStart(3, '0');
+      li.textContent = `Lap ${lapList.length}: ${h}:${m}:${s}.${ms}`;
+      document.getElementById('lapList').appendChild(li);
+    }
 
-    // Timer
     let timerMs = 0, timerInterval;
     function updateTimer() {
       const h = String(Math.floor(timerMs / 3600000)).padStart(2, '0');
@@ -209,6 +259,8 @@
       const mins = parseInt(document.getElementById('inputMinutes').value) || 0;
       const secs = parseInt(document.getElementById('inputSeconds').value) || 0;
       timerMs = ((hrs * 3600) + (mins * 60) + secs) * 1000;
+      const taskName = document.getElementById('timerTaskName').value;
+      document.getElementById('displayTaskName').textContent = taskName ? `Task: ${taskName}` : '';
       updateTimer();
     }
     function startTimer() {
@@ -219,6 +271,9 @@
             timerMs = 0;
             clearInterval(timerInterval);
             timerInterval = null;
+            document.getElementById('timerSound').play();
+            alert("⏰ Timer finished!");
+            saveTimerHistory();
           }
           updateTimer();
         }, 10);
@@ -252,7 +307,18 @@
       }
     }
 
-    // Init
+    function saveTimerHistory() {
+      const taskName = document.getElementById('timerTaskName').value;
+      const now = new Date();
+      const h = String(Math.floor(timerMs / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((timerMs % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((timerMs % 60000) / 1000)).padStart(2, '0');
+      const entry = `${now.toLocaleString()} - Timer Completed: ${h}:${m}:${s} ${taskName ? '- Task: ' + taskName : ''}`;
+      let history = JSON.parse(localStorage.getItem('timerHistory') || '[]');
+      history.push(entry);
+      localStorage.setItem('timerHistory', JSON.stringify(history));
+    }
+
     updateStopwatch();
     updateTimer();
   </script>
