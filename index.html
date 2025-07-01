@@ -3,228 +3,1530 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task Hub</title>
+  <title>Task Hub - Home</title>
   <style>
-    /* Base Styles */
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #000316;
-      color: #fff;
+    :root {
+      --bg-main: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #2a2a2a;
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --bg-glass-hover: rgba(255, 255, 255, 0.06);
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #8b5cf6;
+      --accent: #06b6d4;
+      --accent-dark: #0891b2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-primary: #ffffff;
+      --text-secondary: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.6);
+      --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-light));
+      --gradient-accent: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      --gradient-success: linear-gradient(135deg, var(--success), #059669);
+      --gradient-warning: linear-gradient(135deg, var(--warning), #d97706);
+      --gradient-danger: linear-gradient(135deg, var(--danger), #dc2626);
+      --gradient-glass: linear-gradient(135deg, var(--bg-glass), rgba(255, 255, 255, 0.01));
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-main) 0%, #0f0f0f 50%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
     nav {
-      background-color: #000000;
-      padding: 1rem 2rem;
+      background: linear-gradient(90deg, var(--bg-secondary), var(--bg-tertiary));
+      backdrop-filter: blur(20px);
+      padding: 1.2rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+      box-shadow: var(--shadow-lg);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border);
     }
 
     nav h1 {
       margin: 0;
       font-size: 1.8rem;
-      color: #ffffff;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
     }
 
     nav div a {
-      margin-left: 1rem;
-      color: #ffffff;
+      margin-left: 2rem;
+      color: var(--text-secondary);
       text-decoration: none;
       font-weight: 500;
-      transition: color 0.3s ease;
+      font-size: 0.95rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    nav div a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-accent);
+      transition: width 0.3s ease;
     }
 
     nav div a:hover {
-      color: #0000FF;
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    nav div a:hover::after {
+      width: 100%;
+    }
+
+    nav div a.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    nav div a.active::after {
+      width: 100%;
+      background: var(--gradient-primary);
     }
 
     main {
-      padding: 3rem 1rem;
+      padding: 2.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2.5rem;
+    }
+
+    .hero-section {
       text-align: center;
+      padding: 3rem 0;
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
     }
 
-    .clock {
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.03), transparent);
+      animation: heroShimmer 8s ease-in-out infinite;
+    }
+
+    @keyframes heroShimmer {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title {
       font-size: 3rem;
-      margin-bottom: 0.5rem;
-      letter-spacing: 2px;
-      color: #e8f0f4;
-      text-shadow: 0 0 8px #0000FF;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
     }
 
-    #currentDate {
+    .hero-subtitle {
       font-size: 1.2rem;
-      color: #a9cde3;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .time-widgets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
       margin-bottom: 2rem;
     }
 
-    #countdownSection {
-      margin-top: 3rem;
+    .time-widget {
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .time-widget::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--gradient-accent);
+    }
+
+    .time-widget:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-hover);
+    }
+
+    .widget-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .clock {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+      text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      font-family: 'Courier New', monospace;
+    }
+
+    .date-display {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .timezone-selector {
+      margin-top: 1rem;
+    }
+
+    .timezone-selector select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .timezone-selector select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    }
+
+    .countdown-section {
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .countdown-section:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
     .editable-heading {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
-      font-style: oblique;
-      margin-bottom: 1.5rem;
-      color: #ffd51c;
-      text-shadow: 0 0 6px #0000FF;
+      gap: 15px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: var(--warning);
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
     }
 
     .editable-heading span {
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .edit-icon {
       cursor: pointer;
-      font-size: 1.3rem;
-      color: #7EC8E3;
-      transition: transform 0.2s ease;
+      font-size: 1.2rem;
+      color: var(--accent);
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 50%;
+      background: rgba(6, 182, 212, 0.1);
     }
 
     .edit-icon:hover {
       transform: scale(1.2);
+      background: rgba(6, 182, 212, 0.2);
     }
 
-    .seconds-bar-container {
-      width: 90%;
-      max-width: 600px;
-      height: 30px;
-      background-color: #000000;
-      border-radius: 20px;
-      overflow: hidden;
-      margin: 1rem auto;
-      position: relative;
-      box-shadow: 0 0 20px #cacaca77;
-    }
+    /* Replace the existing .progress-container section (around lines 234-290) */
+.progress-container {
+  margin: 2rem 0;
+}
 
-    .seconds-bar {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(270deg, #000000, #7EC8E3, #000000);
-      background-size: 600% 600%;
-      animation: animatedBar 8s ease infinite;
-      transition: width 1s linear;
-      border-radius: 20px 0 0 20px;
-    }
+/* Circular countdown timer */
+.circular-progress {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 2rem auto;
+}
 
-    @keyframes animatedBar {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+.circular-progress svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
 
-    .seconds-label {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #ffffff;
-      text-shadow: 0 0 8px #000000, 0 0 20px #000000;
-      margin-top: 1.5rem;
-    }
+.circular-progress .bg-circle {
+  fill: none;
+  stroke: var(--bg-tertiary);
+  stroke-width: 4;
+  opacity: 0.5;
+}
+
+.circular-progress .progress-circle {
+  fill: none;
+  stroke: url(#countdownGradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));
+}
+
+.circular-progress .progress-circle.critical {
+  stroke: url(#criticalGradient);
+  stroke-width: 5;
+  animation: pulseRing 1.5s ease-in-out infinite;
+}
+
+.circular-progress .progress-circle.warning {
+  stroke: url(#warningGradient);
+  stroke-width: 4.5;
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* Add a visible outer border for the circular progress */
+.circular-progress::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.circular-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border-hover);
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+@keyframes pulseRing {
+  0%, 100% { 
+    stroke-width: 8;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+  }
+  50% { 
+    stroke-width: 12;
+    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.8));
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+  }
+  50% { 
+    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.7));
+  }
+}
+
+.progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.progress-label-center {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Sand timer visual effect */
+.sand-timer {
+  position: relative;
+  width: 100%;
+  height: 40px; /* Reduced from 60px */
+  background: #131313;
+  border-radius: 20px; /* Adjusted for new height */
+  overflow: hidden;
+  margin: 1rem 0;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--border); /* Added visible border */
+}
+
+/* Add a subtle outer glow to the sand timer */
+.sand-timer::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 22px;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.sand-particles {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger), var(--warning), var(--primary));
+  border-radius: 18px; /* Slightly smaller than container */
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.85;
+  margin: 2px; /* Small margin to show the border */
+  height: calc(100% - 4px);
+}
+
+.sand-particles::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 40% 30%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 60% 70%, rgba(255,255,255,0.15) 1px, transparent 1px),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,0.1) 0.8px, transparent 0.8px);
+  background-size: 30px 30px, 25px 25px, 35px 35px, 28px 28px;
+  animation: sandFlow 3s linear infinite;
+  border-radius: 18px;
+}
+
+.sand-timer.critical .sand-particles {
+  background: linear-gradient(90deg, var(--danger), #ff6b6b);
+  animation: urgentSand 0.5s ease-in-out infinite alternate;
+}
+
+.sand-timer.critical {
+  border-color: var(--danger);
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.4),
+    0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes sandFlow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50px); }
+}
+
+.sand-timer.critical .sand-particles {
+  background: linear-gradient(90deg, var(--danger), #ff6b6b);
+  animation: urgentSand 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes urgentSand {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+.progress-label {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-top: 1rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.progress-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.progress-detail {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.progress-detail:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.progress-detail-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.progress-detail.critical .progress-detail-value {
+  color: var(--danger);
+  animation: criticalBlink 1s ease-in-out infinite;
+}
+
+.progress-detail.warning .progress-detail-value {
+  color: var(--warning);
+}
+
+@keyframes criticalBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.progress-detail-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 
     .hidden-input {
       display: none;
-      background-color: #000C66;
-      border: 1px solid #7EC8E3;
-      color: #fff;
-      padding: 6px 10px;
-      font-size: 1.1rem;
-      border-radius: 6px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--accent);
+      color: var(--text-primary);
+      padding: 0.8rem 1.2rem;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
     }
+
+    .hidden-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2), var(--shadow-lg);
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .action-card {
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--gradient-success);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .action-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-hover);
+    }
+
+    .action-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .action-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--success);
+    }
+
+    .action-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .action-description {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .weather-widget {
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .weather-widget:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .weather-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .weather-temp {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--warning);
+    }
+
+    .weather-description {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border);
+      padding: 2rem;
+      transition: right 0.3s ease;
+      z-index: 2000;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .settings-panel.open {
+      right: 0;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .close-settings {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .close-settings:hover {
+      color: var(--text-primary);
+    }
+
+    .setting-group {
+      margin-bottom: 2rem;
+    }
+
+    .setting-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .setting-input {
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .setting-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .settings-toggle {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+      z-index: 1500;
+    }
+
+    .settings-toggle:hover {
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      nav {
+        padding: 1rem 1.5rem;
+      }
+
+      nav div a {
+        margin-left: 1rem;
+        font-size: 0.9rem;
+      }
+
+      main {
+        padding: 1.5rem;
+        gap: 1.5rem;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+
+      .clock {
+        font-size: 2.5rem;
+      }
+
+      .time-widgets {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .settings-panel {
+        width: 100%;
+        right: -100%;
+      }
+
+      .settings-toggle {
+        right: 15px;
+        width: 45px;
+        height: 45px;
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
+    }
+
+    /* Selection styling */
+    ::selection {
+      background: rgba(99, 102, 241, 0.3);
+      color: var(--text-primary);
+    }
+
+/* Fix for dropdown options visibility */
+.timezone-selector select option,
+.setting-input option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+/* Additional styling for better appearance */
+.timezone-selector select option:hover,
+.setting-input option:hover {
+  background: var(--bg-tertiary);
+}
+
+/* For better cross-browser compatibility */
+.timezone-selector select,
+.setting-input {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Firefox specific fix */
+@-moz-document url-prefix() {
+  .timezone-selector select option,
+  .setting-input option {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+  }
+}
+
   </style>
 </head>
 <body>
   <nav>
     <h1>Task Hub</h1>
     <div>
-      <a href="index.html" target="_blank">Home</a>
-      <a href="tasks.html" target="_blank">Tasks</a>
-      <a href="stopwatch.html" target="_blank">Stopwatch</a>
-      <a href="history.html" target="_blank">History</a>
+      <a href="index.html" class="active">Home</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="stopwatch.html">Stopwatch</a>
+      <a href="history.html">History</a>
     </div>
   </nav>
 
   <main>
-    <section>
-      <h2 style="color:#7EC8E3;">Current Time</h2>
-      <div class="clock" id="currentTime">00:00:00.000</div>
-      <div id="currentDate"></div>
-
-      <div id="countdownSection">
-        <div class="editable-heading">
-          <span id="headingText">Seconds Left in the Day</span>
-          <span class="edit-icon" onclick="editHeading()">✏️</span>
-        </div>
-        <input type="text" id="editInput" class="hidden-input" onblur="saveHeading()" onkeydown="handleKey(event)" />
-        <div class="seconds-bar-container">
-          <div class="seconds-bar" id="secondsBar"></div>
-        </div>
-        <div class="seconds-label" id="secondsLeftLabel">86400 / 86400</div>
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Welcome to Task Hub</h1>
+        <p class="hero-subtitle">Your personal productivity companion for managing time, tasks, and goals efficiently</p>
       </div>
     </section>
+
+    <div class="time-widgets">
+      <div class="time-widget">
+        <h3 class="widget-title">Current Time</h3>
+        <div class="clock" id="currentTime">00:00:00</div>
+        <div class="date-display" id="currentDate"></div>
+        <div class="timezone-selector">
+          <select id="timezoneSelect">
+            <option value="local">Local Time</option>
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">New York</option>
+            <option value="Europe/London">London</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+            <option value="Asia/Kolkata">India</option>
+            <option value="Australia/Sydney">Sydney</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="time-widget">
+        <h3 class="widget-title">World Clock</h3>
+        <div class="clock" id="worldClock">00:00:00</div>
+        <div class="date-display" id="worldDate"></div>
+        <div class="timezone-selector">
+          <select id="worldTimezoneSelect">
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">New York</option>
+            <option value="Europe/London">London</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+            <option value="Asia/Kolkata">India</option>
+            <option value="Australia/Sydney">Sydney</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <section class="countdown-section">
+      <div class="editable-heading">
+        <span id="headingText">Time Remaining Today</span>
+        <span class="edit-icon" onclick="editHeading()">⚙️</span>
+      </div>
+      <input type="text" id="editInput" class="hidden-input" onblur="saveHeading()" onkeydown="handleKey(event)" />
+      
+      <!-- Replace the existing countdown section HTML (around lines 120-140) -->
+<div class="progress-container">
+  <!-- Circular countdown -->
+  <div class="circular-progress">
+    <svg viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="countdownGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#06b6d4"/>
+          <stop offset="50%" style="stop-color:#6366f1"/>
+          <stop offset="100%" style="stop-color:#8b5cf6"/>
+        </linearGradient>
+        <linearGradient id="warningGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#f59e0b"/>
+          <stop offset="100%" style="stop-color:#fbbf24"/>
+        </linearGradient>
+        <linearGradient id="criticalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#ef4444"/>
+          <stop offset="100%" style="stop-color:#f87171"/>
+        </linearGradient>
+      </defs>
+      <circle class="bg-circle" cx="50" cy="50" r="40"/>
+      <circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="40"/>
+    </svg>
+    <div class="progress-center">
+      <div class="progress-time" id="centerTime">24h</div>
+      <div class="progress-label-center">remaining</div>
+    </div>
+  </div>
+  
+  <!-- Sand timer effect -->
+  <div class="sand-timer" id="sandTimer">
+    <div class="sand-particles" id="sandParticles"></div>
+  </div>
+  
+  <div class="progress-label" id="progressLabel">86400 seconds remaining</div>
+  
+  <div class="progress-details">
+    <div class="progress-detail" id="hoursDetail">
+      <div class="progress-detail-value" id="hoursLeft">24</div>
+      <div class="progress-detail-label">Hours</div>
+    </div>
+    <div class="progress-detail" id="minutesDetail">
+      <div class="progress-detail-value" id="minutesLeft">1440</div>
+      <div class="progress-detail-label">Minutes</div>
+    </div>
+    <div class="progress-detail" id="secondsDetail">
+      <div class="progress-detail-value" id="secondsLeft">86400</div>
+      <div class="progress-detail-label">Seconds</div>
+    </div>
+    <div class="progress-detail" id="percentDetail">
+      <div class="progress-detail-value" id="progressPercent">100%</div>
+      <div class="progress-detail-label">Remaining</div>
+    </div>
+  </div>
+</div>
+    </section>
+
+    <div class="quick-actions">
+      <div class="action-card" onclick="window.open('tasks.html', '_blank')">
+        <div class="action-icon">📋</div>
+        <div class="action-title">Manage Tasks</div>
+        <div class="action-description">Create and organize your daily tasks</div>
+      </div>
+      
+      <div class="action-card" onclick="window.open('stopwatch.html', '_blank')">
+        <div class="action-icon">⏱️</div>
+        <div class="action-title">Stopwatch</div>
+        <div class="action-description">Track time for activities and projects</div>
+      </div>
+      
+      <div class="action-card" onclick="window.open('history.html', '_blank')">
+        <div class="action-icon">📊</div>
+        <div class="action-title">View History</div>
+        <div class="action-description">Analyze your productivity patterns</div>
+      </div>
+      
+      <div class="action-card" onclick="togglePomodoro()">
+        <div class="action-icon">🍅</div>
+        <div class="action-title">Pomodoro Timer</div>
+        <div class="action-description">25-minute focused work sessions</div>
+      </div>
+    </div>
   </main>
 
+  <button class="settings-toggle" onclick="toggleSettings()">⚙️</button>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h3 class="settings-title">Settings</h3>
+      <button class="close-settings" onclick="toggleSettings()">×</button>
+    </div>
+    
+    <div class="setting-group">
+      <label class="setting-label">Default Countdown Target</label>
+      <select class="setting-input" id="countdownTarget">
+        <option value="day">End of Day</option>
+        <option value="week">End of Week</option>
+        <option value="month">End of Month</option>
+        <option value="year">End of Year</option>
+        <option value="custom">Custom Date</option>
+      </select>
+    </div>
+    
+    <div class="setting-group" id="customDateGroup" style="display: none;">
+      <label class="setting-label">Custom Target Date</label>
+      <input type="datetime-local" class="setting-input" id="customDate" />
+    </div>
+    
+    <div class="setting-group">
+      <label class="setting-label">Clock Format</label>
+      <select class="setting-input" id="clockFormat">
+        <option value="24">24 Hour</option>
+        <option value="12">12 Hour</option>
+      </select>
+    </div>
+    
+    <div class="setting-group">
+      <label class="setting-label">Update Interval (ms)</label>
+      <input type="number" class="setting-input" id="updateInterval" value="1000" min="100" max="5000" />
+    </div>
+    
+    <div class="setting-group">
+      <label class="setting-label">Theme Color</label>
+      <select class="setting-input" id="themeColor">
+        <option value="blue">Blue (Default)</option>
+        <option value="purple">Purple</option>
+        <option value="green">Green</option>
+        <option value="orange">Orange</option>
+        <option value="red">Red</option>
+      </select>
+    </div>
+  </div>
+
   <script>
-    function updateClock() {
-      const now = new Date();
+    // Global variables
+    let updateInterval = 1000;
+    let clockFormat = '24';
+    let countdownTarget = 'day';
+    let customTargetDate = null;
+    let pomodoroActive = false;
+    let pomodoroTimeLeft = 25 * 60; // 25 minutes in seconds
 
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-      /*document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;*/
-      document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
-
-      document.getElementById('currentDate').textContent = now.toDateString();
-
-      const totalSecondsInDay = 86400;
-      const secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-      const secondsLeft = totalSecondsInDay - secondsPassed;
-
-      /* document.getElementById('secondsLeftLabel').textContent = `${secondsLeft} / ${totalSecondsInDay}`;*/
-      document.getElementById('secondsLeftLabel').textContent = `${secondsLeft} `;
-
-
-      const bar = document.getElementById('secondsBar');
-      const percentageLeft = (secondsLeft / totalSecondsInDay) * 100;
-      bar.style.width = `${percentageLeft}%`;
+    // Initialize the application
+    function init() {
+      loadSettings();
+      updateAllClocks();
+      setInterval(updateAllClocks, updateInterval);
+      setupEventListeners();
     }
 
-    setInterval(updateClock, 100);
-    updateClock();
-
-    function editHeading() {
-      const heading = document.getElementById('headingText');
-      const input = document.getElementById('editInput');
-
-      input.value = heading.textContent;
-      heading.style.display = 'none';
-      input.style.display = 'inline-block';
-      input.focus();
-    }
-
-    function saveHeading() {
-      const heading = document.getElementById('headingText');
-      const input = document.getElementById('editInput');
-
-      if (input.value.trim() !== '') {
-        heading.textContent = input.value;
+    // Load settings from localStorage
+    function loadSettings() {
+      const savedSettings = JSON.parse(localStorage.getItem('taskHubSettings') || '{}');
+      updateInterval = savedSettings.updateInterval || 1000;
+      clockFormat = savedSettings.clockFormat || '24';
+      countdownTarget = savedSettings.countdownTarget || 'day';
+      customTargetDate = savedSettings.customTargetDate || null;
+      
+      // Update settings UI
+      document.getElementById('updateInterval').value = updateInterval;
+      document.getElementById('clockFormat').value = clockFormat;
+      document.getElementById('countdownTarget').value = countdownTarget;
+      if (customTargetDate) {
+        document.getElementById('customDate').value = customTargetDate;
       }
-
-      input.style.display = 'none';
-      heading.style.display = 'inline-block';
+      
+      // Show custom date input if needed
+      toggleCustomDateInput();
     }
 
+    // Save settings to localStorage
+    function saveSettings() {
+      const settings = {
+      updateInterval: parseInt(document.getElementById('updateInterval').value),
+      clockFormat: document.getElementById('clockFormat').value,
+      countdownTarget: document.getElementById('countdownTarget').value,
+      customTargetDate: document.getElementById('customDate').value,
+      themeColor: document.getElementById('themeColor').value
+      };
+
+      localStorage.setItem('taskHubSettings', JSON.stringify(settings));
+      
+      // Apply settings immediately
+      updateInterval = settings.updateInterval;
+      clockFormat = settings.clockFormat;
+      countdownTarget = settings.countdownTarget;
+      customTargetDate = settings.customTargetDate;
+      
+      // Restart the update interval with new timing
+      clearInterval(window.clockInterval);
+      window.clockInterval = setInterval(updateAllClocks, updateInterval);
+      
+      // Apply theme color
+      applyThemeColor(settings.themeColor);
+    }
+
+    // Apply theme color changes
+    function applyThemeColor(color) {
+      const root = document.documentElement;
+      const colorMaps = {
+        blue: { primary: '#6366f1', accent: '#06b6d4' },
+        purple: { primary: '#8b5cf6', accent: '#a855f7' },
+        green: { primary: '#10b981', accent: '#059669' },
+        orange: { primary: '#f59e0b', accent: '#d97706' },
+        red: { primary: '#ef4444', accent: '#dc2626' }
+      };
+      
+      if (colorMaps[color]) {
+        root.style.setProperty('--primary', colorMaps[color].primary);
+        root.style.setProperty('--accent', colorMaps[color].accent);
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Settings panel event listeners
+      document.getElementById('countdownTarget').addEventListener('change', function() {
+        toggleCustomDateInput();
+        saveSettings();
+      });
+      
+      document.getElementById('clockFormat').addEventListener('change', saveSettings);
+      document.getElementById('updateInterval').addEventListener('change', saveSettings);
+      document.getElementById('customDate').addEventListener('change', saveSettings);
+      document.getElementById('themeColor').addEventListener('change', saveSettings);
+      
+      // Timezone selectors
+      document.getElementById('timezoneSelect').addEventListener('change', updateAllClocks);
+      document.getElementById('worldTimezoneSelect').addEventListener('change', updateAllClocks);
+    }
+
+    // Toggle custom date input visibility
+    function toggleCustomDateInput() {
+      const target = document.getElementById('countdownTarget').value;
+      const customDateGroup = document.getElementById('customDateGroup');
+      customDateGroup.style.display = target === 'custom' ? 'block' : 'none';
+    }
+
+    // Update all clocks and countdown
+    function updateAllClocks() {
+      updateCurrentTime();
+      updateWorldClock();
+      updateCountdown();
+      if (pomodoroActive) {
+        updatePomodoro();
+      }
+    }
+
+    // Update current time display
+    function updateCurrentTime() {
+      const now = new Date();
+      const timezone = document.getElementById('timezoneSelect').value;
+      
+      let displayTime;
+      if (timezone === 'local') {
+        displayTime = now;
+      } else {
+        displayTime = new Date(now.toLocaleString("en-US", {timeZone: timezone}));
+      }
+      
+      const timeString = formatTime(displayTime);
+      const dateString = formatDate(displayTime);
+      
+      document.getElementById('currentTime').textContent = timeString;
+      document.getElementById('currentDate').textContent = dateString;
+    }
+
+    // Update world clock display
+    function updateWorldClock() {
+      const now = new Date();
+      const timezone = document.getElementById('worldTimezoneSelect').value;
+      const displayTime = new Date(now.toLocaleString("en-US", {timeZone: timezone}));
+      
+      const timeString = formatTime(displayTime);
+      const dateString = formatDate(displayTime);
+      
+      document.getElementById('worldClock').textContent = timeString;
+      document.getElementById('worldDate').textContent = dateString;
+    }
+
+    // Format time based on clock format setting
+    function formatTime(date) {
+      if (clockFormat === '12') {
+        return date.toLocaleTimeString('en-US', { 
+          hour12: true, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        });
+      } else {
+        return date.toLocaleTimeString('en-US', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        });
+      }
+    }
+
+    // Format date display
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    // Update countdown display
+    // Add this function to replace the existing updateCountdown function
+function updateCountdown() {
+  const now = new Date();
+  let targetDate;
+  
+  switch (countdownTarget) {
+    case 'day':
+      targetDate = new Date(now);
+      targetDate.setHours(23, 59, 59, 999);
+      break;
+    case 'week':
+      targetDate = new Date(now);
+      const daysToWeekEnd = 7 - now.getDay();
+      targetDate.setDate(now.getDate() + daysToWeekEnd);
+      targetDate.setHours(23, 59, 59, 999);
+      break;
+    case 'month':
+      targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      break;
+    case 'year':
+      targetDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      break;
+    case 'custom':
+      if (customTargetDate) {
+        targetDate = new Date(customTargetDate);
+      } else {
+        targetDate = new Date(now);
+        targetDate.setHours(23, 59, 59, 999);
+      }
+      break;
+    default:
+      targetDate = new Date(now);
+      targetDate.setHours(23, 59, 59, 999);
+  }
+  
+  const totalTime = targetDate.getTime() - new Date(targetDate).setHours(0, 0, 0, 0);
+  const timeLeft = targetDate.getTime() - now.getTime();
+  
+  if (timeLeft <= 0) {
+    document.getElementById('progressLabel').textContent = 'Time\'s up!';
+    document.getElementById('centerTime').textContent = '0';
+    updateCircularProgress(0);
+    updateSandTimer(0);
+    return;
+  }
+  
+  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  const totalSeconds = Math.floor(timeLeft / 1000);
+  
+  // Update display elements
+  document.getElementById('hoursLeft').textContent = hours;
+  document.getElementById('minutesLeft').textContent = minutes;
+  document.getElementById('secondsLeft').textContent = seconds;
+  document.getElementById('progressLabel').textContent = `${totalSeconds.toLocaleString()} seconds remaining`;
+  
+  // Calculate percentage remaining (not completed!)
+  const percentRemaining = Math.max(0, (timeLeft / totalTime) * 100);
+  document.getElementById('progressPercent').textContent = `${Math.round(percentRemaining)}%`;
+  
+  // Update center time display
+  if (hours > 0) {
+    document.getElementById('centerTime').textContent = `${hours}h`;
+  } else if (minutes > 0) {
+    document.getElementById('centerTime').textContent = `${minutes}m`;
+  } else {
+    document.getElementById('centerTime').textContent = `${seconds}s`;
+  }
+  
+  // Update visual elements
+  updateCircularProgress(percentRemaining);
+  updateSandTimer(percentRemaining);
+  updateDetailCards(hours, minutes, seconds);
+}
+
+function updateCircularProgress(percentRemaining) {
+  const circle = document.getElementById('progressCircle');
+  const circumference = 2 * Math.PI * 40; // radius = 40
+  const strokeDasharray = `${(percentRemaining / 100) * circumference} ${circumference}`;
+  
+  circle.style.strokeDasharray = strokeDasharray;
+  
+  // Add visual states based on time remaining
+  circle.classList.remove('warning', 'critical');
+  if (percentRemaining <= 10) {
+    circle.classList.add('critical');
+  } else if (percentRemaining <= 25) {
+    circle.classList.add('warning');
+  }
+}
+
+function updateSandTimer(percentRemaining) {
+  const sandParticles = document.getElementById('sandParticles');
+  const sandTimer = document.getElementById('sandTimer');
+  
+  // Width represents remaining time (shrinks as time runs out)
+  sandParticles.style.width = `${percentRemaining}%`;
+  
+  // Add visual states
+  sandTimer.classList.remove('critical');
+  if (percentRemaining <= 10) {
+    sandTimer.classList.add('critical');
+  }
+}
+
+function updateDetailCards(hours, minutes, seconds) {
+  const hoursDetail = document.getElementById('hoursDetail');
+  const minutesDetail = document.getElementById('minutesDetail');
+  const secondsDetail = document.getElementById('secondsDetail');
+  const percentDetail = document.getElementById('percentDetail');
+  
+  // Remove all state classes
+  [hoursDetail, minutesDetail, secondsDetail, percentDetail].forEach(card => {
+    card.classList.remove('warning', 'critical');
+  });
+  
+  // Add visual states based on remaining time
+  if (hours === 0 && minutes <= 10) {
+    [minutesDetail, secondsDetail].forEach(card => card.classList.add('critical'));
+  } else if (hours === 0 && minutes <= 30) {
+    [minutesDetail, secondsDetail].forEach(card => card.classList.add('warning'));
+  } else if (hours <= 2) {
+    hoursDetail.classList.add('warning');
+  }
+}
+
+    // Get start of period for progress calculation
+    function getStartOfPeriod(date, period) {
+      const start = new Date(date);
+      
+      switch (period) {
+        case 'day':
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          start.setDate(date.getDate() - date.getDay());
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'month':
+          start.setDate(1);
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'year':
+          start.setMonth(0, 1);
+          start.setHours(0, 0, 0, 0);
+          break;
+        case 'custom':
+          // For custom, use 24 hours ago as start
+          start.setTime(date.getTime() - 24 * 60 * 60 * 1000);
+          break;
+        default:
+          start.setHours(0, 0, 0, 0);
+      }
+      
+      return start;
+    }
+
+    // Edit heading functionality
+    function editHeading() {
+      const headingText = document.getElementById('headingText');
+      const editInput = document.getElementById('editInput');
+      
+      editInput.value = headingText.textContent;
+      editInput.style.display = 'block';
+      headingText.style.display = 'none';
+      editInput.focus();
+      editInput.select();
+    }
+
+    // Save heading changes
+    function saveHeading() {
+      const headingText = document.getElementById('headingText');
+      const editInput = document.getElementById('editInput');
+      
+      if (editInput.value.trim() !== '') {
+        headingText.textContent = editInput.value.trim();
+        localStorage.setItem('taskHubHeading', editInput.value.trim());
+      }
+      
+      editInput.style.display = 'none';
+      headingText.style.display = 'inline';
+    }
+
+    // Handle keyboard events in edit input
     function handleKey(event) {
       if (event.key === 'Enter') {
         saveHeading();
+      } else if (event.key === 'Escape') {
+        document.getElementById('editInput').style.display = 'none';
+        document.getElementById('headingText').style.display = 'inline';
       }
     }
+
+    // Toggle settings panel
+    function toggleSettings() {
+      const settingsPanel = document.getElementById('settingsPanel');
+      settingsPanel.classList.toggle('open');
+    }
+
+    // Toggle Pomodoro timer
+    function togglePomodoro() {
+      if (pomodoroActive) {
+        // Stop Pomodoro
+        pomodoroActive = false;
+        pomodoroTimeLeft = 25 * 60; // Reset to 25 minutes
+        updatePomodoroDisplay();
+        alert('Pomodoro timer stopped!');
+      } else {
+        // Start Pomodoro
+        pomodoroActive = true;
+        pomodoroTimeLeft = 25 * 60; // 25 minutes
+        updatePomodoroDisplay();
+        alert('Pomodoro timer started! Focus for 25 minutes.');
+      }
+    }
+
+    // Update Pomodoro timer
+    function updatePomodoro() {
+      if (pomodoroTimeLeft > 0) {
+        pomodoroTimeLeft--;
+        updatePomodoroDisplay();
+      } else {
+        // Pomodoro finished
+        pomodoroActive = false;
+        alert('Pomodoro session complete! Take a 5-minute break.');
+        pomodoroTimeLeft = 25 * 60; // Reset for next session
+        updatePomodoroDisplay();
+      }
+    }
+
+    // Update Pomodoro display
+    function updatePomodoroDisplay() {
+      const pomodoroCards = document.querySelectorAll('.action-card');
+      const pomodoroCard = pomodoroCards[3]; // Fourth card is Pomodoro
+      
+      if (pomodoroActive) {
+        const minutes = Math.floor(pomodoroTimeLeft / 60);
+        const seconds = pomodoroTimeLeft % 60;
+        pomodoroCard.querySelector('.action-title').textContent = 
+          `Pomodoro: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        pomodoroCard.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1))';
+      } else {
+        pomodoroCard.querySelector('.action-title').textContent = 'Pomodoro Timer';
+        pomodoroCard.style.background = '';
+      }
+    }
+
+    // Load saved heading on page load
+    function loadSavedHeading() {
+      const savedHeading = localStorage.getItem('taskHubHeading');
+      if (savedHeading) {
+        document.getElementById('headingText').textContent = savedHeading;
+      }
+    }
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      loadSavedHeading();
+      
+      // Store the interval ID globally so we can clear it
+      window.clockInterval = setInterval(updateAllClocks, updateInterval);
+    });
+
+    // Handle page visibility change to update clocks when tab becomes active
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        updateAllClocks();
+      }
+    });
   </script>
 </body>
 </html>
