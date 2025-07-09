@@ -3,156 +3,640 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task History</title>
+  <title>Task History - Enhanced</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
   <style>
     :root {
-      --bg-main: #0f0f1f;
+      --bg-main: #0a0a0f;
       --bg-section: #1a1a2e;
+      --bg-glass: rgba(255, 255, 255, 0.08);
       --primary: #5c7cfa;
       --accent: #9aedfe;
+      --success: #51cf66;
+      --warning: #ffd43b;
+      --error: #ff6b6b;
       --text: #f1f1f1;
       --muted: #cccccc;
-      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --glow: 0 0 20px rgba(156, 237, 254, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg-main);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg-main) 0%, #1a1a2e 100%);
       color: var(--text);
-      margin: 0;
-      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(92, 124, 250, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(156, 237, 254, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     nav {
-      background-color: var(--bg-section);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 10px #0009;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     nav h1 {
-      margin: 0;
       color: var(--accent);
+      font-size: 1.8rem;
+      text-shadow: 0 0 10px rgba(156, 237, 254, 0.5);
     }
 
     nav div a {
-      margin-left: 1rem;
+      margin-left: 1.5rem;
       color: var(--accent);
       text-decoration: none;
-      transition: color 0.3s ease;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav div a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(156, 237, 254, 0.2), transparent);
+      transition: left 0.3s ease;
+    }
+
+    nav div a:hover::before {
+      left: 100%;
     }
 
     nav div a:hover {
       color: var(--primary);
+      box-shadow: var(--glow);
     }
 
     main {
       padding: 2rem;
-      max-width: 1200px;
-      margin: auto;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     section {
-      background-color: var(--glass);
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
       padding: 2rem;
       margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    section:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px rgba(156, 237, 254, 0.2);
     }
 
     h2 {
       color: var(--accent);
       text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      text-shadow: 0 0 10px rgba(156, 237, 254, 0.5);
     }
 
-    input[type="date"] {
-      padding: 0.5rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid var(--accent);
-      background-color: #1f1f2f;
-      color: var(--text);
-      margin-right: 1rem;
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
 
-    select, button {
-      padding: 0.5rem 1rem;
+    input[type="date"], select {
+      padding: 0.75rem 1rem;
       font-size: 1rem;
-      border-radius: 6px;
-      background-color: var(--primary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    input[type="date"]:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(156, 237, 254, 0.1);
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
-      transition: background 0.3s ease;
-      margin-right: 0.5rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(45deg, var(--success), #40c057);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(45deg, var(--warning), #fab005);
+      color: #000;
+    }
+
+    .btn-error {
+      background: linear-gradient(45deg, var(--error), #f03e3e);
+      color: white;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.3s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
     }
 
     button:hover {
-      background-color: var(--accent);
-      color: #111;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
     .task {
-      background-color: var(--bg-section);
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-radius: 10px;
+      background: var(--bg-section);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 0 10px #0004;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .task span {
-      font-size: 1rem;
+    .task::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      transition: width 0.3s ease;
+    }
+
+    .task:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow);
+    }
+
+    .task:hover::before {
+      width: 8px;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-name {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .task-time {
       color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .task-duration {
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-left: 1rem;
     }
 
     .completed {
+      opacity: 0.6;
+    }
+
+    .completed .task-name {
       text-decoration: line-through;
-      color: #777;
+      color: var(--success);
     }
 
     .task-count {
       text-align: center;
-      margin-top: 1rem;
-      font-weight: bold;
+      margin: 2rem 0;
+      font-size: 1.1rem;
       color: var(--accent);
-    }
-
-    #chartContainer {
-      background-color: var(--bg-section);
-      border-radius: 10px;
+      background: rgba(156, 237, 254, 0.1);
       padding: 1rem;
-      margin-top: 2rem;
-      box-shadow: 0 0 10px #0005;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
 
-    #heatmap {
+    .chart-container {
+      background: var(--bg-section);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    .chart-tab {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--muted);
+    }
+
+    .chart-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .heatmap-container {
+      margin-top: 2rem;
+    }
+
+    .heatmap-title {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+    }
+
+    .heatmap-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .heatmap-months {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .heatmap-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-top: 1rem;
+      grid-template-columns: repeat(53, 1fr);
+      gap: 3px;
+      max-width: 800px;
     }
 
     .heat-box {
-      width: 100%;
-      aspect-ratio: 1;
-      background: #2b2b3d;
-      border-radius: 4px;
-      transition: background 0.3s;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
     }
 
-    .heat-box[data-level="1"] { background-color: #3b8bff; }
-    .heat-box[data-level="2"] { background-color: #1f6fff; }
-    .heat-box[data-level="3"] { background-color: #0e4fff; }
-    .heat-box[data-level="4"] { background-color: #062ce3; }
-    .heat-box[data-level="5"] { background-color: #0316ba; }
+    .heat-box:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(156, 237, 254, 0.5);
+    }
+
+    .heat-box[data-level="1"] { background: rgba(92, 124, 250, 0.3); }
+    .heat-box[data-level="2"] { background: rgba(92, 124, 250, 0.5); }
+    .heat-box[data-level="3"] { background: rgba(92, 124, 250, 0.7); }
+    .heat-box[data-level="4"] { background: rgba(92, 124, 250, 0.9); }
+    .heat-box[data-level="5"] { background: rgba(92, 124, 250, 1); }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .legend-box {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(156, 237, 254, 0.1);
+    }
+
+    .date-range {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem;
+      font-size: 1.1rem;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-section);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      color: var(--accent);
+      font-size: 1.3rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .close-btn:hover {
+      color: var(--error);
+    }
+
+    .productivity-score {
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .streaks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .streak-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .streak-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--success);
+      margin-bottom: 0.5rem;
+    }
+
+    .streak-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .controls > * {
+        width: 100%;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .task {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .heatmap-grid {
+        grid-template-columns: repeat(26, 1fr);
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(156, 237, 254, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -167,132 +651,887 @@
   </nav>
 
   <main>
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalTasks">0</div>
+        <div class="stat-label">Total Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="completedTasks">0</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="completionRate">0%</div>
+        <div class="stat-label">Completion Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avgDuration">0m</div>
+        <div class="stat-label">Avg Duration</div>
+      </div>
+    </div>
+
     <section>
-      <h2>Review Task History</h2>
-      <div style="text-align:center; margin-bottom: 1rem;">
-        <input type="date" id="historyDate" />
+      <h2>Task History Analysis</h2>
+      
+      <!-- Controls -->
+      <div class="controls">
+        <div class="date-range">
+          <label>From:</label>
+          <input type="date" id="startDate" />
+          <label>To:</label>
+          <input type="date" id="endDate" />
+        </div>
         <select id="filter">
-          <option value="all">All</option>
+          <option value="all">All Tasks</option>
           <option value="completed">Completed</option>
           <option value="pending">Pending</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
         </select>
-        <button onclick="loadHistory()">Show Tasks</button>
-        <button onclick="exportCSV()">Export CSV</button>
+        <select id="sortBy">
+          <option value="date">Sort by Date</option>
+          <option value="duration">Sort by Duration</option>
+          <option value="name">Sort by Name</option>
+          <option value="completion">Sort by Status</option>
+        </select>
+        <button class="btn-primary" onclick="loadHistory()">
+          <span class="loading" id="loadingSpinner" style="display: none;"></span>
+          <span id="loadText">Analyze</span>
+        </button>
       </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search tasks..." />
+        <button class="btn-primary" onclick="searchTasks()">Search</button>
+        <button class="btn-warning" onclick="clearSearch()">Clear</button>
+      </div>
+
+      <!-- Task Count and Export -->
       <div class="task-count" id="taskCount"></div>
+      
+      <div style="text-align: center; margin: 1rem 0;">
+        <button class="btn-success" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-success" onclick="exportJSON()">Export JSON</button>
+        <button class="btn-warning" onclick="showAnalytics()">Analytics</button>
+        <button class="btn-error" onclick="clearHistory()">Clear History</button>
+      </div>
+
+      <!-- Results -->
       <div id="result"></div>
-      <div id="chartContainer" style="display:none;">
+
+
+      <!-- Code for the Charts section which is causing the issue. So removed the HTML part instead of the JS Code 
+      
+      <div class="chart-container" id="chartContainer" style="display: none;">
+        <div class="chart-tabs">
+          <div class="chart-tab active" onclick="showChart('duration')">Duration</div>
+          <div class="chart-tab" onclick="showChart('timeline')">Timeline</div>
+          <div class="chart-tab" onclick="showChart('completion')">Completion</div>
+          <div class="chart-tab" onclick="showChart('productivity')">Productivity</div>
+        </div>
         <canvas id="taskChart" height="100"></canvas>
       </div>
-      <h3 style="text-align:center; color: var(--accent); margin-top: 2rem;">Completion Heatmap</h3>
-      <div id="heatmap"></div>
+    
+        The above part is charts section Charts -->
+
+      <!-- Heatmap -->
+      <div class="heatmap-container">
+        <h3 class="heatmap-title">Annual Activity Heatmap</h3>
+        <div class="heatmap-wrapper">
+          <div class="heatmap-months">
+            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+            <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+          </div>
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+          <div class="heatmap-legend">
+            <span>Less</span>
+            <div class="legend-item">
+              <div class="legend-box" style="background: rgba(255, 255, 255, 0.05);"></div>
+              <div class="legend-box" style="background: rgba(92, 124, 250, 0.3);"></div>
+              <div class="legend-box" style="background: rgba(92, 124, 250, 0.5);"></div>
+              <div class="legend-box" style="background: rgba(92, 124, 250, 0.7);"></div>
+              <div class="legend-box" style="background: rgba(92, 124, 250, 1);"></div>
+            </div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streaks -->
+      <div class="streaks">
+        <div class="streak-card">
+          <div class="streak-value" id="currentStreak">0</div>
+          <div class="streak-label">Current Streak</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-value" id="longestStreak">0</div>
+          <div class="streak-label">Longest Streak</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-value" id="thisWeekTasks">0</div>
+          <div class="streak-label">This Week</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-value" id="thisMonthTasks">0</div>
+          <div class="streak-label">This Month</div>
+        </div>
+      </div>
     </section>
   </main>
 
+  <!-- Analytics Modal -->
+  <div id="analyticsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Productivity Analytics</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="analyticsContent"></div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
   <script>
+    let currentChart = null;
+    let allTasks = [];
+    let filteredTasks = [];
+    let currentChartType = 'duration';
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePage();
+      generateHeatmap();
+      calculateStreaks();
+      updateStats();
+    });
+
+    function initializePage() {
+      const today = new Date();
+      const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      document.getElementById('startDate').value = oneWeekAgo.toISOString().split('T')[0];
+      document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    }
+
     function loadHistory() {
-      const date = document.getElementById('historyDate').value;
-      const filter = document.getElementById('filter').value;
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
-      const list = tasks[date] || [];
-      const result = document.getElementById('result');
-      const countDisplay = document.getElementById('taskCount');
-      const chartContainer = document.getElementById('chartContainer');
+  showLoading(true);
 
-      result.innerHTML = '';
-      countDisplay.textContent = '';
-      chartContainer.style.display = 'none';
+  setTimeout(() => {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const filter = document.getElementById('filter').value;
+    const sortBy = document.getElementById('sortBy').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-      let filtered = list;
-      if (filter === 'completed') filtered = list.filter(t => t.completed);
-      else if (filter === 'pending') filtered = list.filter(t => !t.completed);
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+    let allTasks = [];
 
-      if (!filtered.length) {
-        result.innerHTML = '<div style="color: #aaa; text-align: center;">No tasks found for this filter.</div>';
-        return;
+    // Collect tasks based on filter
+    const today = new Date();
+    if (filter === 'today') {
+      const dateStr = today.toISOString().split('T')[0];
+      allTasks = (tasks[dateStr] || []).map(task => ({ ...task, date: dateStr }));
+    } else if (filter === 'week') {
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split('T')[0];
+        const dayTasks = (tasks[dateStr] || []).map(task => ({ ...task, date: dateStr }));
+        allTasks.push(...dayTasks);
       }
+    } else if (filter === 'month') {
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
 
-      countDisplay.textContent = `Total: ${filtered.length} | Completed: ${filtered.filter(t => t.completed).length}`;
-
-      const labels = [];
-      const durations = [];
-
-      filtered.forEach(t => {
-        const div = document.createElement('div');
-        div.className = 'task';
-        div.innerHTML = `<span class="${t.completed ? 'completed' : ''}">${t.start} - ${t.end} | ${t.name}</span>`;
-        result.appendChild(div);
-
-        const start = new Date(`1970-01-01T${t.start}:00`);
-        const end = new Date(`1970-01-01T${t.end}:00`);
-        const diff = (end - start) / (1000 * 60); // minutes
-        labels.push(t.name);
-        durations.push(diff);
+      Object.keys(tasks).forEach(dateStr => {
+        const date = new Date(dateStr);
+        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+          const monthTasks = (tasks[dateStr] || []).map(task => ({ ...task, date: dateStr }));
+          allTasks.push(...monthTasks);
+        }
       });
+    } else {
+      // Custom date range or all
+      const start = new Date(startDate);
+      const end = new Date(endDate);
 
-      chartContainer.style.display = 'block';
-
-      const ctx = document.getElementById('taskChart').getContext('2d');
-      if (window.taskChart) window.taskChart.destroy();
-
-      window.taskChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Duration (minutes)',
-            data: durations,
-            backgroundColor: '#9aedfe',
-            borderColor: '#5c7cfa',
-            borderWidth: 1,
-          }]
-        },
-        options: {
-          plugins: {
-            legend: { labels: { color: '#ffffff' } }
-          },
-          scales: {
-            x: { ticks: { color: '#ffffff' } },
-            y: { ticks: { color: '#ffffff' }, beginAtZero: true }
-          }
+      Object.keys(tasks).forEach(dateStr => {
+        const date = new Date(dateStr);
+        if (!isNaN(start) && !isNaN(end) && date >= start && date <= end) {
+          const rangedTasks = (tasks[dateStr] || []).map(task => ({ ...task, date: dateStr }));
+          allTasks.push(...rangedTasks);
         }
       });
     }
 
-    function exportCSV() {
-      const date = document.getElementById('historyDate').value;
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
-      const list = tasks[date] || [];
+    // Filter tasks by search and status
+    const filteredTasks = allTasks.filter(task => {
+      const matchesSearch = !searchTerm || task.name.toLowerCase().includes(searchTerm);
+      const matchesFilter =
+        filter === 'all' ||
+        ['today', 'week', 'month'].includes(filter) ||
+        (filter === 'completed' && task.completed) ||
+        (filter === 'pending' && !task.completed);
 
-      if (!list.length) return alert("No tasks to export.");
+      return matchesSearch && matchesFilter;
+    });
 
-      let csv = 'Task Name,Start,End,Completed\n';
-      list.forEach(t => {
-        csv += `${t.name},${t.start},${t.end},${t.completed ? 'Yes' : 'No'}\n`;
+    showLoading(false);
+  }, 500);
+}
+
+
+    function sortTasks(sortBy) {
+      filteredTasks.sort((a, b) => {
+        switch (sortBy) {
+          case 'duration':
+            return getDuration(b) - getDuration(a);
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'completion':
+            return b.completed - a.completed;
+          case 'date':
+          default:
+            return new Date(b.date || '1970-01-01') - new Date(a.date || '1970-01-01');
+        }
       });
+    }
 
+    function getDuration(task) {
+      const start = new Date(`1970-01-01T${task.start}:00`);
+      const end = new Date(`1970-01-01T${task.end}:00`);
+      return (end - start) / (1000 * 60); // minutes
+    }
+
+    function displayTasks() {
+      const result = document.getElementById('result');
+      const countDisplay = document.getElementById('taskCount');
+      const chartContainer = document.getElementById('chartContainer');
+      
+      result.innerHTML = '';
+      
+      if (!filteredTasks.length) {
+        result.innerHTML = `
+          <div class="empty-state">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <div>No tasks found for the selected criteria</div>
+          </div>
+        `;
+        chartContainer.style.display = 'none';
+        return;
+      }
+      
+      const completed = filteredTasks.filter(t => t.completed).length;
+      const total = filteredTasks.length;
+      const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+      
+      countDisplay.innerHTML = `
+        <strong>Total: ${total}</strong> | 
+        <strong>Completed: ${completed}</strong> | 
+        <strong>Pending: ${total - completed}</strong> | 
+        <strong>Completion Rate: ${completionRate}%</strong>
+      `;
+      
+      filteredTasks.forEach((task, index) => {
+        const div = document.createElement('div');
+        div.className = `task fade-in ${task.completed ? 'completed' : ''}`;
+        div.style.animationDelay = `${index * 0.1}s`;
+        
+        const duration = getDuration(task);
+        const durationText = duration >= 60 ? 
+          `${Math.floor(duration / 60)}h ${duration % 60}m` : 
+          `${duration}m`;
+        
+        div.innerHTML = `
+          <div class="task-content">
+            <div class="task-name">${task.name}</div>
+            <div class="task-time">${task.start} - ${task.end} ${task.date ? `(${task.date})` : ''}</div>
+          </div>
+          <div class="task-duration">${durationText}</div>
+        `;
+        
+        result.appendChild(div);
+      });
+      
+      chartContainer.style.display = 'block';
+    }
+
+    function showChart(type) {
+      currentChartType = type;
+      
+      // Update active tab
+      document.querySelectorAll('.chart-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Find and activate the correct tab
+      const activeTab = document.querySelector(`[onclick="showChart('${type}')"]`);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+      
+      // Don't create chart if no filtered tasks
+      if (!filteredTasks || filteredTasks.length === 0) {
+        return;
+      }
+      
+      const ctx = document.getElementById('taskChart').getContext('2d');
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+      }
+      
+      const chartConfig = getChartConfig(type);
+      currentChart = new Chart(ctx, chartConfig);
+    }
+
+
+    function getChartConfig(type) {
+      const baseConfig = {
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              labels: { color: '#ffffff' },
+              position: 'top'
+            }
+          },
+          scales: {
+            x: { 
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            y: { 
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255,255,255,0.1)' },
+              beginAtZero: true 
+            }
+          }
+        }
+      };
+      
+      switch (type) {
+        case 'duration':
+          const topTasks = filteredTasks.slice(0, 10);
+          return {
+            type: 'bar',
+            data: {
+              labels: topTasks.map(t => t.name.length > 20 ? t.name.substring(0, 20) + '...' : t.name),
+              datasets: [{
+                label: 'Duration (minutes)',
+                data: topTasks.map(getDuration),
+                backgroundColor: 'rgba(156, 237, 254, 0.6)',
+                borderColor: '#9aedfe',
+                borderWidth: 2,
+                borderRadius: 4
+              }]
+            },
+            ...baseConfig
+          };
+          
+        case 'timeline':
+          const timelineData = getTimelineData();
+          return {
+            type: 'line',
+            data: {
+              labels: timelineData.labels,
+              datasets: [{
+                label: 'Tasks Completed',
+                data: timelineData.completed,
+                borderColor: '#51cf66',
+                backgroundColor: 'rgba(81, 207, 102, 0.1)',
+                fill: true,
+                tension: 0.4
+              }, {
+                label: 'Total Tasks',
+                data: timelineData.total,
+                borderColor: '#5c7cfa',
+                backgroundColor: 'rgba(92, 124, 250, 0.1)',
+                fill: true,
+                tension: 0.4
+              }]
+            },
+            ...baseConfig
+          };
+          
+        case 'completion':
+          const completedCount = filteredTasks.filter(t => t.completed).length;
+          const pendingCount = filteredTasks.length - completedCount;
+          return {
+            type: 'doughnut',
+            data: {
+              labels: ['Completed', 'Pending'],
+              datasets: [{
+                data: [completedCount, pendingCount],
+                backgroundColor: ['#51cf66', '#ff6b6b'],
+                borderColor: ['#40c057', '#f03e3e'],
+                borderWidth: 2
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { 
+                  labels: { color: '#ffffff' },
+                  position: 'bottom'
+                }
+              }
+            }
+          };
+          
+        case 'productivity':
+          const productivityData = getProductivityData();
+          return {
+            type: 'radar',
+            data: {
+              labels: ['Morning (6-12)', 'Afternoon (12-17)', 'Evening (17-22)', 'Night (22-6)'],
+              datasets: [{
+                label: 'Completed Tasks',
+                data: productivityData.completed,
+                backgroundColor: 'rgba(92, 124, 250, 0.2)',
+                borderColor: '#5c7cfa',
+                borderWidth: 2,
+                pointBackgroundColor: '#5c7cfa',
+                pointBorderColor: '#ffffff',
+                pointHoverBackgroundColor: '#ffffff',
+                pointHoverBorderColor: '#5c7cfa'
+              }, {
+                label: 'Total Tasks',
+                data: productivityData.total,
+                backgroundColor: 'rgba(156, 237, 254, 0.2)',
+                borderColor: '#9aedfe',
+                borderWidth: 2,
+                pointBackgroundColor: '#9aedfe',
+                pointBorderColor: '#ffffff',
+                pointHoverBackgroundColor: '#ffffff',
+                pointHoverBorderColor: '#9aedfe'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { 
+                  labels: { color: '#ffffff' },
+                  position: 'top'
+                }
+              },
+              scales: {
+                r: {
+                  ticks: { 
+                    color: '#ffffff',
+                    backdropColor: 'transparent'
+                  },
+                  grid: { color: 'rgba(255,255,255,0.1)' },
+                  pointLabels: { color: '#ffffff' },
+                  beginAtZero: true
+                }
+              }
+            }
+          };
+          
+        default:
+          return {
+            type: 'bar',
+            data: {
+              labels: ['No Data'],
+              datasets: [{
+                label: 'No Data',
+                data: [0],
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+                borderWidth: 1
+              }]
+            },
+            ...baseConfig
+          };
+      }
+    }
+
+
+    function getTimelineData() {
+      const dateGroups = {};
+      
+      filteredTasks.forEach(task => {
+        const date = task.date || new Date().toISOString().split('T')[0];
+        if (!dateGroups[date]) {
+          dateGroups[date] = { total: 0, completed: 0 };
+        }
+        dateGroups[date].total++;
+        if (task.completed) {
+          dateGroups[date].completed++;
+        }
+      });
+      
+      const sortedDates = Object.keys(dateGroups).sort();
+      return {
+        labels: sortedDates.map(date => {
+          const d = new Date(date);
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }),
+        total: sortedDates.map(date => dateGroups[date].total),
+        completed: sortedDates.map(date => dateGroups[date].completed)
+      };
+    }
+
+    function getProductivityData() {
+      const timeSlots = { 
+        morning: { total: 0, completed: 0 }, 
+        afternoon: { total: 0, completed: 0 }, 
+        evening: { total: 0, completed: 0 }, 
+        night: { total: 0, completed: 0 } 
+      };
+      
+      filteredTasks.forEach(task => {
+        const hour = parseInt(task.start.split(':')[0]);
+        let slot;
+        
+        if (hour >= 6 && hour < 12) slot = 'morning';
+        else if (hour >= 12 && hour < 17) slot = 'afternoon';
+        else if (hour >= 17 && hour < 22) slot = 'evening';
+        else slot = 'night';
+        
+        timeSlots[slot].total++;
+        if (task.completed) {
+          timeSlots[slot].completed++;
+        }
+      });
+      
+      return {
+        total: [timeSlots.morning.total, timeSlots.afternoon.total, timeSlots.evening.total, timeSlots.night.total],
+        completed: [timeSlots.morning.completed, timeSlots.afternoon.completed, timeSlots.evening.completed, timeSlots.night.completed]
+      };
+    }
+
+    function searchTasks() {
+      loadHistory();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      loadHistory();
+    }
+
+    function exportCSV() {
+      if (!filteredTasks.length) {
+        alert("No tasks to export.");
+        return;
+      }
+      
+      let csv = 'Task Name,Start Time,End Time,Duration (minutes),Status,Date\n';
+      filteredTasks.forEach(task => {
+        const duration = getDuration(task);
+        const date = task.date || new Date().toISOString().split('T')[0];
+        csv += `"${task.name}","${task.start}","${task.end}","${duration}","${task.completed ? 'Completed' : 'Pending'}","${date}"\n`;
+      });
+      
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      saveAs(blob, `TaskHistory-${date}.csv`);
+      saveAs(blob, `TaskHistory-${new Date().toISOString().split('T')[0]}.csv`);
     }
 
-    // Generate a simple heatmap (past 28 days)
-    const heatmap = document.getElementById('heatmap');
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
-    const today = new Date();
-
-    for (let i = 27; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const key = d.toISOString().split('T')[0];
-      const list = tasks[key] || [];
-      const completed = list.filter(t => t.completed).length;
-      const level = Math.min(5, Math.floor(completed / 2));
-
-      const box = document.createElement('div');
-      box.className = 'heat-box';
-      box.dataset.level = level;
-      heatmap.appendChild(box);
+    function exportJSON() {
+      if (!filteredTasks.length) {
+        alert("No tasks to export.");
+        return;
+      }
+      
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        totalTasks: filteredTasks.length,
+        completedTasks: filteredTasks.filter(t => t.completed).length,
+        tasks: filteredTasks
+      };
+      
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      saveAs(blob, `TaskHistory-${new Date().toISOString().split('T')[0]}.json`);
     }
+
+    function generateHeatmap() {
+      const heatmapGrid = document.getElementById('heatmapGrid');
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+      const today = new Date();
+      
+      heatmapGrid.innerHTML = '';
+      
+      // Generate 365 days (53 weeks * 7 days)
+      for (let week = 0; week < 53; week++) {
+        for (let day = 0; day < 7; day++) {
+          const date = new Date(today.getFullYear(), 0, 1);
+          date.setDate(date.getDate() + week * 7 + day);
+          
+          if (date > today) continue;
+          
+          const dateStr = date.toISOString().split('T')[0];
+          const dayTasks = tasks[dateStr] || [];
+          const completedTasks = dayTasks.filter(t => t.completed).length;
+          
+          const level = Math.min(5, Math.floor(completedTasks / 2));
+          
+          const box = document.createElement('div');
+          box.className = 'heat-box';
+          box.dataset.level = level;
+          box.dataset.date = dateStr;
+          box.dataset.tasks = completedTasks;
+          
+          box.addEventListener('mouseenter', showTooltip);
+          box.addEventListener('mouseleave', hideTooltip);
+          
+          heatmapGrid.appendChild(box);
+        }
+      }
+    }
+
+    function showTooltip(event) {
+      const tooltip = document.getElementById('tooltip');
+      const box = event.target;
+      const date = box.dataset.date;
+      const tasks = box.dataset.tasks;
+      
+      tooltip.innerHTML = `
+        <strong>${date}</strong><br>
+        ${tasks} tasks completed
+      `;
+      
+      tooltip.style.display = 'block';
+      tooltip.style.left = event.pageX + 10 + 'px';
+      tooltip.style.top = event.pageY - 40 + 'px';
+    }
+
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    function calculateStreaks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+      const today = new Date();
+      
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 0;
+      let thisWeekTasks = 0;
+      let thisMonthTasks = 0;
+      
+      // Calculate current streak
+      for (let i = 0; i < 365; i++) {
+        const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split('T')[0];
+        const dayTasks = tasks[dateStr] || [];
+        const hasCompletedTasks = dayTasks.some(t => t.completed);
+        
+        if (hasCompletedTasks) {
+          if (i === 0 || tempStreak > 0) {
+            tempStreak++;
+            if (i < 30) currentStreak = tempStreak;
+          }
+        } else {
+          if (tempStreak > longestStreak) {
+            longestStreak = tempStreak;
+          }
+          tempStreak = 0;
+        }
+        
+        // This week tasks
+        if (i < 7) {
+          thisWeekTasks += dayTasks.filter(t => t.completed).length;
+        }
+        
+        // This month tasks
+        if (i < 30) {
+          thisMonthTasks += dayTasks.filter(t => t.completed).length;
+        }
+      }
+      
+      if (tempStreak > longestStreak) {
+        longestStreak = tempStreak;
+      }
+      
+      document.getElementById('currentStreak').textContent = currentStreak;
+      document.getElementById('longestStreak').textContent = longestStreak;
+      document.getElementById('thisWeekTasks').textContent = thisWeekTasks;
+      document.getElementById('thisMonthTasks').textContent = thisMonthTasks;
+    }
+
+    function updateStats() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+      let totalTasks = 0;
+      let completedTasks = 0;
+      let totalDuration = 0;
+      
+      Object.values(tasks).forEach(dayTasks => {
+        dayTasks.forEach(task => {
+          totalTasks++;
+          if (task.completed) completedTasks++;
+          totalDuration += getDuration(task);
+        });
+      });
+      
+      const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      const avgDuration = totalTasks > 0 ? Math.round(totalDuration / totalTasks) : 0;
+      
+      document.getElementById('totalTasks').textContent = totalTasks;
+      document.getElementById('completedTasks').textContent = completedTasks;
+      document.getElementById('completionRate').textContent = completionRate + '%';
+      document.getElementById('avgDuration').textContent = avgDuration + 'm';
+    }
+
+    function showAnalytics() {
+      const modal = document.getElementById('analyticsModal');
+      const content = document.getElementById('analyticsContent');
+      
+      const analytics = generateAnalytics();
+      
+      content.innerHTML = `
+        <div class="productivity-score">${analytics.productivityScore}</div>
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h4>Productivity Score</h4>
+          <p style="color: var(--muted);">Based on completion rate, consistency, and task variety</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+            <h5>Best Day</h5>
+            <p>${analytics.bestDay}</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+            <h5>Most Productive Time</h5>
+            <p>${analytics.mostProductiveTime}</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+            <h5>Average Session</h5>
+            <p>${analytics.averageSession} minutes</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+            <h5>Task Variety</h5>
+            <p>${analytics.taskVariety} unique tasks</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+          <h4>Insights</h4>
+          <ul style="list-style: none; padding: 0;">
+            ${analytics.insights.map(insight => `<li style="margin: 0.5rem 0; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">• ${insight}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+      
+      modal.style.display = 'block';
+    }
+
+    function generateAnalytics() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+      const allTasks = [];
+      
+      Object.entries(tasks).forEach(([date, dayTasks]) => {
+        dayTasks.forEach(task => {
+          allTasks.push({...task, date});
+        });
+      });
+      
+      const completedTasks = allTasks.filter(t => t.completed);
+      const completionRate = allTasks.length > 0 ? (completedTasks.length / allTasks.length) * 100 : 0;
+      
+      // Calculate productivity score
+      const consistencyScore = calculateConsistency(tasks);
+      const varietyScore = calculateVariety(allTasks);
+      const productivityScore = Math.round((completionRate + consistencyScore + varietyScore) / 3);
+      
+      // Find best day
+      const dayStats = {};
+      Object.entries(tasks).forEach(([date, dayTasks]) => {
+        dayStats[date] = dayTasks.filter(t => t.completed).length;
+      });
+      const bestDay = Object.entries(dayStats).reduce((a, b) => dayStats[a[0]] > dayStats[b[0]] ? a : b, ['', 0]);
+      
+      // Most productive time
+      const timeSlots = { morning: 0, afternoon: 0, evening: 0, night: 0 };
+      completedTasks.forEach(task => {
+        const hour = parseInt(task.start.split(':')[0]);
+        if (hour >= 6 && hour < 12) timeSlots.morning++;
+        else if (hour >= 12 && hour < 17) timeSlots.afternoon++;
+        else if (hour >= 17 && hour < 22) timeSlots.evening++;
+        else timeSlots.night++;
+      });
+      const mostProductiveTime = Object.entries(timeSlots).reduce((a, b) => timeSlots[a[0]] > timeSlots[b[0]] ? a : b)[0];
+      
+      // Average session duration
+      const totalDuration = allTasks.reduce((sum, task) => sum + getDuration(task), 0);
+      const averageSession = allTasks.length > 0 ? Math.round(totalDuration / allTasks.length) : 0;
+      
+      // Task variety
+      const uniqueTasks = new Set(allTasks.map(t => t.name.toLowerCase())).size;
+      
+      // Generate insights
+      const insights = [];
+      if (completionRate > 80) insights.push("Excellent task completion rate! Keep up the great work.");
+      if (consistencyScore > 70) insights.push("You're very consistent with your daily tasks.");
+      if (varietyScore > 60) insights.push("Good variety in your task types.");
+      if (mostProductiveTime === 'morning') insights.push("You're most productive in the morning.");
+      if (averageSession > 60) insights.push("Your tasks tend to be longer sessions - consider breaking them down.");
+      if (uniqueTasks > 20) insights.push("You handle a diverse range of tasks effectively.");
+      
+      return {
+        productivityScore,
+        bestDay: bestDay[0] || 'N/A',
+        mostProductiveTime: mostProductiveTime.charAt(0).toUpperCase() + mostProductiveTime.slice(1),
+        averageSession,
+        taskVariety: uniqueTasks,
+        insights
+      };
+    }
+
+    function calculateConsistency(tasks) {
+      const dates = Object.keys(tasks);
+      const daysWithTasks = dates.filter(date => tasks[date].some(t => t.completed)).length;
+      return dates.length > 0 ? (daysWithTasks / dates.length) * 100 : 0;
+    }
+
+    function calculateVariety(tasks) {
+      const uniqueTasks = new Set(tasks.map(t => t.name.toLowerCase())).size;
+      return Math.min(100, uniqueTasks * 5); // Max 100, 5 points per unique task
+    }
+
+    function closeModal() {
+      document.getElementById('analyticsModal').style.display = 'none';
+    }
+
+    function clearHistory() {
+      if (confirm('Are you sure you want to clear all task history? This action cannot be undone.')) {
+        localStorage.removeItem('tasks');
+        location.reload();
+      }
+    }
+
+    function showLoading(show) {
+      const spinner = document.getElementById('loadingSpinner');
+      const text = document.getElementById('loadText');
+      
+      if (show) {
+        spinner.style.display = 'inline-block';
+        text.textContent = 'Loading...';
+      } else {
+        spinner.style.display = 'none';
+        text.textContent = 'Analyze';
+      }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('analyticsModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Initialize with current week data
+    loadHistory();
   </script>
 </body>
 </html>
